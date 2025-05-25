@@ -5,8 +5,6 @@ type RowUpdateStatus = "not_updated" | "updating" | "updated";
 interface RowUpdatesState {
   // tableId -> rowIndex -> status
   rowStatuses: Record<string, Record<number, RowUpdateStatus>>;
-  // Global update lock
-  isUpdating: boolean;
 
   // Actions
   setRowStatus: (
@@ -17,12 +15,11 @@ interface RowUpdatesState {
   getRowStatus: (tableId: string, rowIndex: number) => RowUpdateStatus;
   resetTable: (tableId: string) => void;
   initializeTable: (tableId: string, rowCount: number) => void;
-  canUpdate: () => boolean;
+  canUpdateRow: (tableId: string, rowIndex: number) => boolean;
 }
 
 export const useRowUpdatesStore = create<RowUpdatesState>((set, get) => ({
   rowStatuses: {},
-  isUpdating: false,
 
   setRowStatus: (
     tableId: string,
@@ -30,12 +27,11 @@ export const useRowUpdatesStore = create<RowUpdatesState>((set, get) => ({
     status: RowUpdateStatus
   ) => {
     set((state) => {
-      // If this is an update to "updating" status, set the global lock
-      if (status === "updating") {
-        state.isUpdating = true;
-      } else {
-        // If this is a final status, release the global lock
-        state.isUpdating = false;
+      const currentStatus = state.rowStatuses[tableId]?.[rowIndex];
+
+      // If the row is already updated, don't allow any changes
+      if (currentStatus === "updated") {
+        return state;
       }
 
       // Ensure we have the table entry
@@ -49,7 +45,6 @@ export const useRowUpdatesStore = create<RowUpdatesState>((set, get) => ({
             [rowIndex]: status,
           },
         },
-        isUpdating: state.isUpdating,
       };
     });
   },
@@ -59,8 +54,10 @@ export const useRowUpdatesStore = create<RowUpdatesState>((set, get) => ({
     return state.rowStatuses[tableId]?.[rowIndex] ?? "not_updated";
   },
 
-  canUpdate: () => {
-    return !get().isUpdating;
+  canUpdateRow: (tableId: string, rowIndex: number) => {
+    const state = get();
+    const currentStatus = state.rowStatuses[tableId]?.[rowIndex];
+    return currentStatus !== "updated";
   },
 
   resetTable: (tableId: string) => {
@@ -70,7 +67,6 @@ export const useRowUpdatesStore = create<RowUpdatesState>((set, get) => ({
 
       return {
         rowStatuses: newStatuses,
-        isUpdating: false,
       };
     });
   },
@@ -90,7 +86,6 @@ export const useRowUpdatesStore = create<RowUpdatesState>((set, get) => ({
           ...state.rowStatuses,
           [tableId]: newStatuses,
         },
-        isUpdating: false,
       };
     });
   },
