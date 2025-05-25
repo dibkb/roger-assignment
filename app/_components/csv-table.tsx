@@ -14,19 +14,25 @@ import { useTableUpdates } from "@/app/_hooks/useTableUpdates";
 import { Button } from "@/components/ui/button";
 import { useEnrichment } from "@/lib/hooks/use-enrichment";
 import { missingCount } from "@/lib/csv/missing-count";
-import { Loader2, PlayIcon, RefreshCw } from "lucide-react";
+import { Loader2, PlayIcon, RefreshCw, CheckCircle2 } from "lucide-react";
 import { EnrichmentStatus } from "@/lib/types";
-import { enrichSingle } from "@/lib/enrich-single";
 
 interface CsvTableProps {
   data: z.infer<typeof uploadResponseSchema>;
   tableData: z.infer<typeof uploadResponseSchema>["data"];
-  setTableData: React.Dispatch<
-    React.SetStateAction<z.infer<typeof uploadResponseSchema>["data"]>
-  >;
+  onRowUpdate: (rowIndex: number) => Promise<void>;
+  getRowStatus: (
+    tableId: string,
+    rowIndex: number
+  ) => "not_updated" | "updating" | "updated";
 }
 
-const CsvTable = ({ data, tableData, setTableData }: CsvTableProps) => {
+const CsvTable = ({
+  data,
+  tableData,
+  onRowUpdate,
+  getRowStatus,
+}: CsvTableProps) => {
   const [enrichmentStatus, setEnrichmentStatus] =
     useState<EnrichmentStatus>("idle");
   const {
@@ -74,33 +80,35 @@ const CsvTable = ({ data, tableData, setTableData }: CsvTableProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tableData.map((row, index) => (
-            <TableRow key={`row-${data.id}-${index}`}>
-              <TableCell>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    enrichSingle(index, tableData).then((response) => {
-                      if (response.success && response.data) {
-                        const newData = [...tableData];
-                        newData[index] = response.data;
-                        setTableData(newData);
-                      }
-                    });
-                  }}
-                  className="p-1"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </Button>
-              </TableCell>
-              {headers.map((header) => (
-                <TableCell key={`${data.id}-${index}-${header}`}>
-                  {row[header] ?? ""}
+          {tableData.map((row, index) => {
+            const status = getRowStatus(data.id, index);
+            return (
+              <TableRow key={`row-${data.id}-${index}`}>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onRowUpdate(index)}
+                    disabled={status === "updating"}
+                    className="p-1"
+                  >
+                    {status === "updating" ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : status === "updated" ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4" />
+                    )}
+                  </Button>
                 </TableCell>
-              ))}
-            </TableRow>
-          ))}
+                {headers.map((header) => (
+                  <TableCell key={`${data.id}-${index}-${header}`}>
+                    {row[header] ?? ""}
+                  </TableCell>
+                ))}
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
 
