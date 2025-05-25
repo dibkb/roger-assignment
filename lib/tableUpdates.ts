@@ -8,6 +8,7 @@ export interface RowData {
 export interface RowUpdate {
   data: string;
   read: boolean;
+  error?: string;
 }
 
 export type TableUpdates = Record<string, RowUpdate>;
@@ -23,6 +24,7 @@ export interface UpdateEvent {
 // --- Store ---
 class TableUpdateManager {
   private store: UpdatesStore = {};
+  public completedTables: Set<string> = new Set();
 
   pushUpdate(tableId: string, rowId: string, data: string) {
     if (!this.store[tableId]) {
@@ -52,8 +54,18 @@ class TableUpdateManager {
     return this.getUnreadUpdates(tableId);
   }
 
+  markTableAsCompleted(tableId: string) {
+    console.log("Marking table as completed", tableId);
+    this.completedTables.add(tableId);
+  }
+
+  isTableCompleted(tableId: string): boolean {
+    return this.completedTables.has(tableId);
+  }
+
   clearTable(tableId: string) {
     delete this.store[tableId];
+    this.completedTables.delete(tableId);
   }
 }
 

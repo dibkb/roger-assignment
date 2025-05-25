@@ -13,15 +13,15 @@ export const enrichmentAgent = new Agent({
   Input Format:
   You will receive a JSON object with the following fields:
   {
-    full_name: string,
-    first_name: string,
-    last_name: string,
-    title: string,
-    email: string,
-    linkedin_url: string,
-    company_name: string,
-    company_domain: string,
-    company_description: string
+    "full_name": "string",
+    "first_name": "string",
+    "last_name": "string",
+    "title": "string",
+    "email": "string",
+    "linkedin_url": "string",
+    "company_name": "string",
+    "company_domain": "string",
+    "company_description": "string"
   }
 
   Output Format:

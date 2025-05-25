@@ -1,54 +1,41 @@
+import { cleanAndParseJson } from "@/lib/clean-json";
 import { tableUpdates } from "@/lib/tableUpdates";
 import { uploadResponseSchema } from "@/lib/zod/api/csv";
-import { enrichmentAgent } from "@/src/mastra/agents/enrichment";
+import { mockServer } from "@/mock.server";
+// import { mockServer } from "@/mock.server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
     const parsed = uploadResponseSchema.parse(data);
+    const rows = parsed.data;
 
-    const idx = 4;
-    const row = parsed.data[idx];
-    // const result = await enrichmentAgent.generate(JSON.stringify(row));
-    console.log("--------------------------------");
-    console.log("Index", idx);
-    // const json = JSON.parse(result.text);
-    tableUpdates.pushUpdate(
-      parsed.id,
-      idx.toString(),
-      JSON.stringify({
-        full_name: "Siddharth Shankar Tripathi",
-        first_name: "Siddharth",
-        last_name: "Shankar Tripathi",
-        title: "Founder at Ringg AI",
-        email: "sidharth.t@srmap.edu.in",
-        linkedin_url: "https://www.linkedin.com/in/sidsst",
-        company_name: "Ringg AI",
-        company_domain: "ringg.ai",
-        company_description:
-          "Hire AI voice callers for your business operations in an instant. Our AI callers are multilingual, international and 24x7 available.",
-      })
-    );
-    // clear the table
-    // tableUpdates.clearTable(parsed.id);
-    console.log("--------------------------------");
+    // Process all rows concurrently
+    const promises = rows.map(async (row, idx) => {
+      const result = await mockServer.enrich(idx.toString());
+      // const result = await enrichmentAgent.generate(JSON.stringify(row));
+      try {
+        // const json = cleanAndParseJson(result as string);
+        const json = cleanAndParseJson(JSON.stringify(result));
 
-    // parsed.data.forEach(async (row, idx) => {
-    //   const result = await enrichmentAgent.generate(JSON.stringify(row));
-    //   console.log("--------------------------------");
-    //   console.log("Index", idx);
-    //   tableUpdates.pushUpdate(
-    //     parsed.id,
-    //     idx.toString(),
-    //     JSON.stringify(result.text)
-    //   );
-    //   console.log("--------------------------------");
-    // });
-    // parsed.data.forEach(async (row, idx) => {
-    //   // console.log("--------------------------------");
-    //   // tableUpdates.pushUpdate(parsed.id, idx.toString(), result.text);
-    // });
+        tableUpdates.pushUpdate(
+          parsed.id,
+          idx.toString(),
+          JSON.stringify(json)
+        );
+      } catch (error) {
+        console.log("Error parsing JSON:", error);
+      }
+    });
+
+    // Wait for all processing to complete
+    await Promise.all(promises);
+
+    // Only mark as completed after all updates are processed
+    console.log("All rows processed, marking table as completed");
+    tableUpdates.markTableAsCompleted(parsed.id);
+
     return NextResponse.json({
       id: parsed.id,
       data: parsed,

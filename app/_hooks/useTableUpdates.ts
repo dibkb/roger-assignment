@@ -18,7 +18,6 @@ export const useTableUpdates = (
   const [mounted, setMounted] = useState(false);
   const [tableData, setTableData] = useState<typeof initialData.data>([]);
   const [error, setError] = useState<string | null>(null);
-  const [enriching, setEnriching] = useState(false);
   useEffect(() => {
     setTableData(initialData.data);
     setMounted(true);
@@ -67,7 +66,6 @@ export const useTableUpdates = (
                     return newData;
                   });
                   rowIds.push(rowId);
-                  setEnriching(true);
                 }
               }
             });
@@ -79,7 +77,12 @@ export const useTableUpdates = (
               });
             }
           } else {
-            if (enriching) {
+            const response = await axios.get(
+              `/api/update-complete?tableId=${initialData.id}`
+            );
+            const isCompleted = response.data.isCompleted;
+            console.log("isCompleted", isCompleted);
+            if (isCompleted) {
               setEnrichmentStatus("success");
             }
           }
@@ -109,7 +112,6 @@ export const useTableUpdates = (
     tableData,
     mounted,
     enrichmentStatus,
-    enriching,
     setEnrichmentStatus,
   ]);
 
