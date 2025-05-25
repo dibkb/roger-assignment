@@ -9,7 +9,7 @@ import CsvNotFound from "@/app/_components/not-found";
 import { enrichSingle } from "@/lib/enrich-single";
 import { PersonSchema } from "@/lib/zod/api/response";
 import { z } from "zod";
-
+import pLimit from "p-limit";
 export default function CSVPage({
   params,
 }: {
@@ -38,38 +38,41 @@ export default function CSVPage({
 
       setRowStatus(csv_id, rowIndex, "updating");
 
-      enrichSingle(rowIndex, tableData)
-        .then((response) => {
-          if (response.success && response.data) {
-            setTableData((prevData) => {
-              const newData = [...prevData];
-
-              newData[rowIndex] = response.data as unknown as z.infer<
-                typeof PersonSchema
-              >;
-              return newData;
-            });
-            setRowStatus(csv_id, rowIndex, "updated");
-          } else {
-            setRowStatus(csv_id, rowIndex, "not_updated");
-          }
-        })
-        .catch((error) => {
-          console.error("Error updating row:", error);
+      try {
+        const response = await enrichSingle(rowIndex, tableData);
+        if (response.success && response.data) {
+          setTableData((prevData) => {
+            const newData = [...prevData];
+            newData[rowIndex] = response.data as z.infer<typeof PersonSchema>;
+            return newData;
+          });
+          setRowStatus(csv_id, rowIndex, "updated");
+        } else {
           setRowStatus(csv_id, rowIndex, "not_updated");
-        });
+        }
+      } catch (error) {
+        console.error("Error updating row:", error);
+        setRowStatus(csv_id, rowIndex, "not_updated");
+      }
     },
     [csv_id, tableData, canUpdateRow, setRowStatus]
   );
 
-  const handleUpdateAll = useCallback(() => {
+  const handleUpdateAll = useCallback(async () => {
     if (!csv) return;
 
-    csv.data.forEach((_, index) => {
-      if (canUpdateRow(csv_id, index)) {
-        handleRowUpdate(index);
-      }
+    const limit = pLimit(3);
+
+    const tasks = csv.data.map((_, index) => {
+      return limit(() => {
+        if (canUpdateRow(csv_id, index)) {
+          return handleRowUpdate(index);
+        }
+        return Promise.resolve();
+      });
     });
+
+    await Promise.all(tasks);
   }, [csv, csv_id, canUpdateRow, handleRowUpdate]);
 
   if (isLoading) {
