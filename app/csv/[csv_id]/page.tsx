@@ -7,10 +7,13 @@ import { missingCount } from "@/lib/csv/missing-count";
 import { useCSVData } from "@/lib/hooks/use-csv-data";
 import { useEnrichment } from "@/lib/hooks/use-enrichment";
 import { Loader2, PlayIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 
 export default function CSVPage() {
-  const { csv, isLoading } = useCSVData();
-  const { enrichmentStatus, startEnrichment } = useEnrichment();
+  const params = useParams();
+  const csv_id = params.csv_id as string;
+  const { csv, isLoading } = useCSVData(csv_id);
+  const { enrichmentStatus, startEnrichment } = useEnrichment(csv_id);
 
   if (isLoading) {
     return <Loading />;

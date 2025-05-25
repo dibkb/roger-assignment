@@ -1,10 +1,15 @@
 import { z } from "zod";
 
-const csvDataSchema = z.record(z.string());
+const contactSchema = z.record(z.string().nullable());
 
 export const uploadResponseSchema = z.object({
   id: z.string(),
-  data: z.array(csvDataSchema),
+  data: z.array(contactSchema),
+});
+
+export const enrichmentUploadSchema = z.object({
+  id: z.string(),
+  data: z.array(contactSchema),
 });
 
 export const errorResponseSchema = z.object({
