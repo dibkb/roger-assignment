@@ -17,11 +17,11 @@ export async function POST(request: NextRequest) {
     const parsed = enrichSingleSchema.parse(data);
 
     try {
-      // const result = await enrichmentAgent.generate(
-      //   JSON.stringify(parsed.data)
-      // );
-      // const json = cleanAndParseJson(result.text);
-      const json = await mockServer.enrich(parsed.rowIndex);
+      const result = await enrichmentAgent.generate(
+        JSON.stringify(parsed.data)
+      );
+      const json = cleanAndParseJson(result.text);
+      // const json = await mockServer.enrich(parsed.rowIndex);
 
       return NextResponse.json({
         success: true,

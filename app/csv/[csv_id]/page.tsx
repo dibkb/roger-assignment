@@ -2,7 +2,7 @@
 
 import { useRowUpdatesStore } from "@/lib/store/row-updates-store";
 import { useCSVData } from "@/lib/hooks/use-csv-data";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useCallback } from "react";
 import CsvTable from "@/app/_components/csv-table";
 import Loading from "@/app/_components/loading";
 import CsvNotFound from "@/app/_components/not-found";
@@ -30,34 +30,47 @@ export default function CSVPage({
     }
   }, [csv, csv_id, initializeTable]);
 
-  const handleRowUpdate = async (rowIndex: number) => {
-    if (!canUpdateRow(csv_id, rowIndex)) {
-      return;
-    }
+  const handleRowUpdate = useCallback(
+    async (rowIndex: number) => {
+      if (!canUpdateRow(csv_id, rowIndex)) {
+        return;
+      }
 
-    setRowStatus(csv_id, rowIndex, "updating");
+      setRowStatus(csv_id, rowIndex, "updating");
 
-    enrichSingle(rowIndex, tableData)
-      .then((response) => {
-        if (response.success && response.data) {
-          setTableData((prevData) => {
-            const newData = [...prevData];
+      enrichSingle(rowIndex, tableData)
+        .then((response) => {
+          if (response.success && response.data) {
+            setTableData((prevData) => {
+              const newData = [...prevData];
 
-            newData[rowIndex] = response.data as unknown as z.infer<
-              typeof PersonSchema
-            >;
-            return newData;
-          });
-          setRowStatus(csv_id, rowIndex, "updated");
-        } else {
+              newData[rowIndex] = response.data as unknown as z.infer<
+                typeof PersonSchema
+              >;
+              return newData;
+            });
+            setRowStatus(csv_id, rowIndex, "updated");
+          } else {
+            setRowStatus(csv_id, rowIndex, "not_updated");
+          }
+        })
+        .catch((error) => {
+          console.error("Error updating row:", error);
           setRowStatus(csv_id, rowIndex, "not_updated");
-        }
-      })
-      .catch((error) => {
-        console.error("Error updating row:", error);
-        setRowStatus(csv_id, rowIndex, "not_updated");
-      });
-  };
+        });
+    },
+    [csv_id, tableData, canUpdateRow, setRowStatus]
+  );
+
+  const handleUpdateAll = useCallback(() => {
+    if (!csv) return;
+
+    csv.data.forEach((_, index) => {
+      if (canUpdateRow(csv_id, index)) {
+        handleRowUpdate(index);
+      }
+    });
+  }, [csv, csv_id, canUpdateRow, handleRowUpdate]);
 
   if (isLoading) {
     return <Loading />;
@@ -74,6 +87,7 @@ export default function CSVPage({
         tableData={tableData}
         onRowUpdate={handleRowUpdate}
         getRowStatus={getRowStatus}
+        updateAll={handleUpdateAll}
       />
     </main>
   );
