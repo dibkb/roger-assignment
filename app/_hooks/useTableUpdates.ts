@@ -76,15 +76,15 @@ export const useTableUpdates = (
                 rowIds: rowIds,
               });
             }
-          } else {
-            const response = await axios.get(
-              `/api/update-complete?tableId=${initialData.id}`
-            );
-            const isCompleted = response.data.isCompleted;
-            console.log("isCompleted", isCompleted);
-            if (isCompleted) {
-              setEnrichmentStatus("success");
-            }
+          }
+
+          // Check completion status regardless of updates
+          const completionResponse = await axios.get(
+            `/api/update-complete?tableId=${initialData.id}`
+          );
+          const isCompleted = completionResponse.data.isCompleted;
+          if (isCompleted) {
+            setEnrichmentStatus("success");
           }
         } catch (error) {
           if (isMounted) {
@@ -92,9 +92,6 @@ export const useTableUpdates = (
               error instanceof Error ? error.message : "Failed to fetch updates"
             );
             console.error("Error fetching updates:", error);
-          }
-        } finally {
-          if (isMounted) {
           }
         }
       };

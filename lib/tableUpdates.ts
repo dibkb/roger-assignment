@@ -21,10 +21,14 @@ export interface UpdateEvent {
   data: string;
 }
 
+// Global store to persist data between requests
+const globalStore: UpdatesStore = {};
+const globalCompletedTables = new Set<string>();
+
 // --- Store ---
 class TableUpdateManager {
-  private store: UpdatesStore = {};
-  public completedTables: Set<string> = new Set();
+  private store: UpdatesStore = globalStore;
+  public completedTables: Set<string> = globalCompletedTables;
 
   pushUpdate(tableId: string, rowId: string, data: string) {
     if (!this.store[tableId]) {
@@ -57,10 +61,17 @@ class TableUpdateManager {
   markTableAsCompleted(tableId: string) {
     console.log("Marking table as completed", tableId);
     this.completedTables.add(tableId);
+    console.log("Current completed tables:", Array.from(this.completedTables));
   }
 
   isTableCompleted(tableId: string): boolean {
-    return this.completedTables.has(tableId);
+    const isCompleted = this.completedTables.has(tableId);
+    console.log("Checking if table is completed:", {
+      tableId,
+      isCompleted,
+      completedTables: Array.from(this.completedTables),
+    });
+    return isCompleted;
   }
 
   clearTable(tableId: string) {

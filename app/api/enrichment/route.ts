@@ -1,7 +1,8 @@
 import { cleanAndParseJson } from "@/lib/clean-json";
 import { tableUpdates } from "@/lib/tableUpdates";
 import { uploadResponseSchema } from "@/lib/zod/api/csv";
-import { mockServer } from "@/mock.server";
+// import { mockServer } from "@/mock.server";
+import { enrichmentAgent } from "@/src/mastra/agents/enrichment";
 // import { mockServer } from "@/mock.server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,15 +11,15 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     const parsed = uploadResponseSchema.parse(data);
     const rows = parsed.data;
-
     // Process all rows concurrently
     const promises = rows.map(async (row, idx) => {
-      const result = await mockServer.enrich(idx.toString());
-      // const result = await enrichmentAgent.generate(JSON.stringify(row));
+      // const result = await mockServer.enrich(idx.toString());
+      const result = await enrichmentAgent.generate(JSON.stringify(row));
       try {
-        // const json = cleanAndParseJson(result as string);
-        const json = cleanAndParseJson(JSON.stringify(result));
+        // const json = result;
 
+        const json = cleanAndParseJson(JSON.stringify(result.text));
+        console.log(json);
         tableUpdates.pushUpdate(
           parsed.id,
           idx.toString(),
@@ -29,10 +30,8 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Wait for all processing to complete
     await Promise.all(promises);
 
-    // Only mark as completed after all updates are processed
     console.log("All rows processed, marking table as completed");
     tableUpdates.markTableAsCompleted(parsed.id);
 
