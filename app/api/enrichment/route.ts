@@ -1,44 +1,52 @@
 import { cleanAndParseJson } from "@/lib/clean-json";
 import { tableUpdates } from "@/lib/tableUpdates";
 import { uploadResponseSchema } from "@/lib/zod/api/csv";
-// import { mockServer } from "@/mock.server";
 import { enrichmentAgent } from "@/src/mastra/agents/enrichment";
-// import { mockServer } from "@/mock.server";
 import { NextRequest, NextResponse } from "next/server";
+
+interface RowData {
+  [key: string]: unknown;
+}
+
+async function processBatch(
+  rows: RowData[],
+  startIdx: number,
+  batchSize: number,
+  tableId: string
+) {
+  const batch = rows.slice(startIdx, startIdx + batchSize);
+  const promises = batch.map(async (row, batchIdx) => {
+    const idx = startIdx + batchIdx;
+    try {
+      const result = await enrichmentAgent.generate(JSON.stringify(row));
+      const json = cleanAndParseJson(result.text);
+      tableUpdates.pushUpdate(tableId, idx.toString(), JSON.stringify(json));
+    } catch (error) {
+      console.log("Error processing row:", error);
+      tableUpdates.pushUpdate(
+        tableId,
+        idx.toString(),
+        JSON.stringify({ error: "Failed to process row" }),
+        error instanceof Error ? error.message : "Unknown error occurred"
+      );
+    }
+  });
+  await Promise.all(promises);
+}
 
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
     const parsed = uploadResponseSchema.parse(data);
     const rows = parsed.data;
-    // Process all rows concurrently
-    const promises = rows.map(async (row, idx) => {
-      // const result = await mockServer.enrich(idx.toString());
-      const result = await enrichmentAgent.generate(JSON.stringify(row));
-      try {
-        // const json = result;
+    const BATCH_SIZE = 5;
 
-        const json = cleanAndParseJson(JSON.stringify(result.text));
-        console.log(json);
-        tableUpdates.pushUpdate(
-          parsed.id,
-          idx.toString(),
-          JSON.stringify(json)
-        );
-      } catch (error) {
-        console.log("Error parsing JSON:", error);
-      }
-    });
+    // Process rows in batches of 5
+    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+      await processBatch(rows, i, BATCH_SIZE, parsed.id);
+    }
 
-    await Promise.all(promises);
-
-    console.log("All rows processed, marking table as completed");
-    tableUpdates.markTableAsCompleted(parsed.id);
-
-    return NextResponse.json({
-      id: parsed.id,
-      data: parsed,
-    });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Enrichment error:", error);
     return NextResponse.json(

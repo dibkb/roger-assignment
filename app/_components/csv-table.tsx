@@ -14,14 +14,19 @@ import { useTableUpdates } from "@/app/_hooks/useTableUpdates";
 import { Button } from "@/components/ui/button";
 import { useEnrichment } from "@/lib/hooks/use-enrichment";
 import { missingCount } from "@/lib/csv/missing-count";
-import { Loader2, PlayIcon } from "lucide-react";
+import { Loader2, PlayIcon, RefreshCw } from "lucide-react";
 import { EnrichmentStatus } from "@/lib/types";
+import { enrichSingle } from "@/lib/enrich-single";
 
 interface CsvTableProps {
   data: z.infer<typeof uploadResponseSchema>;
+  tableData: z.infer<typeof uploadResponseSchema>["data"];
+  setTableData: React.Dispatch<
+    React.SetStateAction<z.infer<typeof uploadResponseSchema>["data"]>
+  >;
 }
 
-const CsvTable = ({ data }: CsvTableProps) => {
+const CsvTable = ({ data, tableData, setTableData }: CsvTableProps) => {
   const [enrichmentStatus, setEnrichmentStatus] =
     useState<EnrichmentStatus>("idle");
   const {
@@ -30,11 +35,11 @@ const CsvTable = ({ data }: CsvTableProps) => {
     mounted: enrichmentMounted,
   } = useEnrichment(data.id, enrichmentStatus, setEnrichmentStatus);
 
-  const {
-    tableData,
-    error: tableError,
-    mounted: tableMounted,
-  } = useTableUpdates(data, enrichmentStatus, setEnrichmentStatus);
+  const { error: tableError, mounted: tableMounted } = useTableUpdates(
+    data,
+    enrichmentStatus,
+    setEnrichmentStatus
+  );
 
   const headers = Object.keys(data.data[0]);
   const missing = useMemo(() => {
@@ -62,6 +67,7 @@ const CsvTable = ({ data }: CsvTableProps) => {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-[50px]">Actions</TableHead>
             {headers.map((header) => (
               <TableHead key={header}>{header}</TableHead>
             ))}
@@ -70,6 +76,24 @@ const CsvTable = ({ data }: CsvTableProps) => {
         <TableBody>
           {tableData.map((row, index) => (
             <TableRow key={`row-${data.id}-${index}`}>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    enrichSingle(index, tableData).then((response) => {
+                      if (response.success && response.data) {
+                        const newData = [...tableData];
+                        newData[index] = response.data;
+                        setTableData(newData);
+                      }
+                    });
+                  }}
+                  className="p-1"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </TableCell>
               {headers.map((header) => (
                 <TableCell key={`${data.id}-${index}-${header}`}>
                   {row[header] ?? ""}

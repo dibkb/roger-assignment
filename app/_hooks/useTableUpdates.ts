@@ -16,12 +16,11 @@ export const useTableUpdates = (
   setEnrichmentStatus: (status: EnrichmentStatus) => void
 ) => {
   const [mounted, setMounted] = useState(false);
-  const [tableData, setTableData] = useState<typeof initialData.data>([]);
   const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    setTableData(initialData.data);
     setMounted(true);
-  }, [initialData.data]);
+  }, []);
 
   useEffect(() => {
     if (!mounted) return;
@@ -35,85 +34,31 @@ export const useTableUpdates = (
 
       const pollUpdates = async () => {
         if (!isMounted) return;
-
         try {
-          setError(null);
           const response = await axios.get(
-            `/api/updates?tableId=${initialData.id}`
+            `/api/table-updates/${initialData.id}`
           );
-          const updates = response.data as TableUpdate[];
-          const rowIds: string[] = [];
+          const updates = response.data.updates as TableUpdate[];
 
-          if (updates?.length > 0) {
-            updates.forEach((update) => {
-              const { tableId, rowId, data: updateData } = update;
-              if (tableId === initialData.id) {
-                const rowIndex = tableData.findIndex(
-                  (_, idx) => idx === parseInt(rowId)
-                );
-                if (rowIndex !== -1) {
-                  setTableData((prevData) => {
-                    const newData = [...prevData];
-                    try {
-                      const parsedData = JSON.parse(updateData);
-                      newData[rowIndex] = {
-                        ...newData[rowIndex],
-                        ...parsedData,
-                      };
-                    } catch (e) {
-                      console.error("Failed to parse update data:", e);
-                    }
-                    return newData;
-                  });
-                  rowIds.push(rowId);
-                }
-              }
-            });
-
-            if (rowIds.length > 0) {
-              axios.post("/api/mark", {
-                tableId: initialData.id,
-                rowIds: rowIds,
-              });
-            }
-          }
-
-          // Check completion status regardless of updates
-          const completionResponse = await axios.get(
-            `/api/update-complete?tableId=${initialData.id}`
-          );
-          const isCompleted = completionResponse.data.isCompleted;
-          if (isCompleted) {
+          if (updates.length > 0) {
             setEnrichmentStatus("success");
           }
-        } catch (error) {
-          if (isMounted) {
-            setError(
-              error instanceof Error ? error.message : "Failed to fetch updates"
-            );
-            console.error("Error fetching updates:", error);
-          }
+        } catch (err) {
+          console.error("Error polling updates:", err);
+          setError("Failed to fetch updates");
+          setEnrichmentStatus("error");
         }
       };
 
-      const intervalId = setInterval(pollUpdates, POLLING_INTERVAL);
-      pollUpdates();
-
+      const interval = setInterval(pollUpdates, POLLING_INTERVAL);
       return () => {
         isMounted = false;
-        clearInterval(intervalId);
+        clearInterval(interval);
       };
     }
-  }, [
-    initialData.id,
-    tableData,
-    mounted,
-    enrichmentStatus,
-    setEnrichmentStatus,
-  ]);
+  }, [mounted, enrichmentStatus, initialData.id, setEnrichmentStatus]);
 
   return {
-    tableData,
     error,
     mounted,
   };

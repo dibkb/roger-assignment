@@ -25,14 +25,10 @@ export const useEnrichment = (
     }
 
     try {
-      const response = await fetch("/api/enrichment", {
+      await fetch("/api/enrichment", {
         method: "POST",
         body: JSON.stringify(csv),
       });
-      const data = await response.json();
-      console.log(data);
-      setError(null);
-
       setEnrichmentStatus("loading");
     } catch (err) {
       setError(

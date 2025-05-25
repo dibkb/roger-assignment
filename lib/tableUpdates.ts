@@ -30,11 +30,11 @@ class TableUpdateManager {
   private store: UpdatesStore = globalStore;
   public completedTables: Set<string> = globalCompletedTables;
 
-  pushUpdate(tableId: string, rowId: string, data: string) {
+  pushUpdate(tableId: string, rowId: string, data: string, error?: string) {
     if (!this.store[tableId]) {
       this.store[tableId] = {};
     }
-    this.store[tableId][rowId] = { data, read: false };
+    this.store[tableId][rowId] = { data, read: false, error };
   }
 
   getUnreadUpdates(tableId: string): UpdateEvent[] {
@@ -56,22 +56,6 @@ class TableUpdateManager {
 
   subscribe(tableId: string): UpdateEvent[] {
     return this.getUnreadUpdates(tableId);
-  }
-
-  markTableAsCompleted(tableId: string) {
-    console.log("Marking table as completed", tableId);
-    this.completedTables.add(tableId);
-    console.log("Current completed tables:", Array.from(this.completedTables));
-  }
-
-  isTableCompleted(tableId: string): boolean {
-    const isCompleted = this.completedTables.has(tableId);
-    console.log("Checking if table is completed:", {
-      tableId,
-      isCompleted,
-      completedTables: Array.from(this.completedTables),
-    });
-    return isCompleted;
   }
 
   clearTable(tableId: string) {
