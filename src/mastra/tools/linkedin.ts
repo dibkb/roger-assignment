@@ -47,7 +47,6 @@ export const linkedInSearchTool = createTool({
           ),
         }
       );
-      console.log(results.data);
       return { results: results.data };
     } catch (error) {
       if (axios.isAxiosError(error)) {

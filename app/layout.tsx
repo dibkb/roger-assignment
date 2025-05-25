@@ -28,7 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <nav className="flex items-center justify-between p-6 mx-auto container">
+        <nav className="flex items-center justify-between py-6 mx-auto container">
           <Logo />
         </nav>
         {children}
