@@ -1,0 +1,7 @@
+full_name,first_name,last_name,title,email,linkedin_url,company_name,company_domain,company_description
+Alice Johnson,Alice,Johnson,, ,https://www.linkedin.com/in/alice-johnson/,Acme Corp,,
+Bob Lee,Bob,Lee,CTO,bob.lee@example.com,,Techify Inc,techify.com,Innovative tech solutions
+Carol Smith,Carol,Smith,, ,https://www.linkedin.com/in/carol-smith/,,,
+Dan Brown,Dan,Brown,Product Manager,,,BrightWave,,Marketing & advertising agency
+Elena Gilbert,Elena,Gilbert,,,,,,
+Frank Wright,Frank,Wright,Engineer,frank.wright@example.com,https://www.linkedin.com/in/frank-wright/,BuildIt LLC,buildit.io,Construction software
