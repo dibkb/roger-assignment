@@ -1,5 +1,4 @@
 // lib/tableUpdates.ts
-import { EventEmitter } from "events";
 
 // --- Types ---
 export interface RowData {
@@ -21,18 +20,15 @@ export interface UpdateEvent {
   data: string;
 }
 
-// --- Store & Event Emitter ---
+// --- Store ---
 class TableUpdateManager {
   private store: UpdatesStore = {};
-  private emitter = new EventEmitter();
 
   pushUpdate(tableId: string, rowId: string, data: string) {
     if (!this.store[tableId]) {
       this.store[tableId] = {};
     }
     this.store[tableId][rowId] = { data, read: false };
-
-    this.emitter.emit(tableId, { tableId, rowId, data } as UpdateEvent);
   }
 
   getUnreadUpdates(tableId: string): UpdateEvent[] {
@@ -52,14 +48,12 @@ class TableUpdateManager {
     });
   }
 
-  subscribe(tableId: string, listener: (evt: UpdateEvent) => void) {
-    this.emitter.on(tableId, listener);
-    return () => this.emitter.off(tableId, listener);
+  subscribe(tableId: string): UpdateEvent[] {
+    return this.getUnreadUpdates(tableId);
   }
 
   clearTable(tableId: string) {
     delete this.store[tableId];
-    this.emitter.removeAllListeners(tableId);
   }
 }
 

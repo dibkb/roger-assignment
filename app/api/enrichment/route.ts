@@ -2,17 +2,47 @@ import { tableUpdates } from "@/lib/tableUpdates";
 import { uploadResponseSchema } from "@/lib/zod/api/csv";
 import { enrichmentAgent } from "@/src/mastra/agents/enrichment";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
     const parsed = uploadResponseSchema.parse(data);
+
     const idx = 4;
     const row = parsed.data[idx];
-    const result = await enrichmentAgent.generate(JSON.stringify(row));
+    // const result = await enrichmentAgent.generate(JSON.stringify(row));
+    console.log("--------------------------------");
     console.log("Index", idx);
-    console.log("Result", result.text);
+    // const json = JSON.parse(result.text);
+    tableUpdates.pushUpdate(
+      parsed.id,
+      idx.toString(),
+      JSON.stringify({
+        full_name: "Siddharth Shankar Tripathi",
+        first_name: "Siddharth",
+        last_name: "Shankar Tripathi",
+        title: "Founder at Ringg AI",
+        email: "sidharth.t@srmap.edu.in",
+        linkedin_url: "https://www.linkedin.com/in/sidsst",
+        company_name: "Ringg AI",
+        company_domain: "ringg.ai",
+        company_description:
+          "Hire AI voice callers for your business operations in an instant. Our AI callers are multilingual, international and 24x7 available.",
+      })
+    );
+    console.log("--------------------------------");
+
+    // parsed.data.forEach(async (row, idx) => {
+    //   const result = await enrichmentAgent.generate(JSON.stringify(row));
+    //   console.log("--------------------------------");
+    //   console.log("Index", idx);
+    //   tableUpdates.pushUpdate(
+    //     parsed.id,
+    //     idx.toString(),
+    //     JSON.stringify(result.text)
+    //   );
+    //   console.log("--------------------------------");
+    // });
     // parsed.data.forEach(async (row, idx) => {
     //   // console.log("--------------------------------");
     //   // tableUpdates.pushUpdate(parsed.id, idx.toString(), result.text);
