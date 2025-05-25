@@ -7,6 +7,8 @@ import CsvTable from "@/app/_components/csv-table";
 import Loading from "@/app/_components/loading";
 import CsvNotFound from "@/app/_components/not-found";
 import { enrichSingle } from "@/lib/enrich-single";
+import { PersonSchema } from "@/lib/zod/api/response";
+import { z } from "zod";
 
 export default function CSVPage({
   params,
@@ -29,21 +31,21 @@ export default function CSVPage({
   }, [csv, csv_id, initializeTable]);
 
   const handleRowUpdate = async (rowIndex: number) => {
-    // Only proceed if the row hasn't been updated yet
     if (!canUpdateRow(csv_id, rowIndex)) {
       return;
     }
 
     setRowStatus(csv_id, rowIndex, "updating");
 
-    // Fire and forget - don't await the update
     enrichSingle(rowIndex, tableData)
       .then((response) => {
         if (response.success && response.data) {
           setTableData((prevData) => {
             const newData = [...prevData];
-            // Ensure the data is properly typed
-            newData[rowIndex] = response.data as Record<string, string | null>;
+
+            newData[rowIndex] = response.data as unknown as z.infer<
+              typeof PersonSchema
+            >;
             return newData;
           });
           setRowStatus(csv_id, rowIndex, "updated");

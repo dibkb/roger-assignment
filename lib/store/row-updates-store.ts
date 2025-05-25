@@ -6,7 +6,6 @@ interface RowUpdatesState {
   // tableId -> rowIndex -> status
   rowStatuses: Record<string, Record<number, RowUpdateStatus>>;
 
-  // Actions
   setRowStatus: (
     tableId: string,
     rowIndex: number,
@@ -29,12 +28,10 @@ export const useRowUpdatesStore = create<RowUpdatesState>((set, get) => ({
     set((state) => {
       const currentStatus = state.rowStatuses[tableId]?.[rowIndex];
 
-      // If the row is already updated, don't allow any changes
       if (currentStatus === "updated") {
         return state;
       }
 
-      // Ensure we have the table entry
       const tableStatuses = state.rowStatuses[tableId] || {};
 
       return {
@@ -76,7 +73,6 @@ export const useRowUpdatesStore = create<RowUpdatesState>((set, get) => ({
       const existingStatuses = state.rowStatuses[tableId] || {};
       const newStatuses: Record<number, RowUpdateStatus> = {};
 
-      // Initialize all rows as not_updated
       for (let i = 0; i < rowCount; i++) {
         newStatuses[i] = existingStatuses[i] || "not_updated";
       }
