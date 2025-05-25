@@ -27,8 +27,8 @@ const CsvTable = ({ data }: CsvTableProps) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {rows.map((row) => (
-          <TableRow key={row.id}>
+        {rows.map((row, id) => (
+          <TableRow key={Object.values(row).join(",") + id}>
             {headers.map((header) => (
               <TableCell key={header}>{row[header]}</TableCell>
             ))}
