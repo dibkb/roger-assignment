@@ -1,15 +1,23 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useCSVStore } from "../store/csv-store";
+import { EnrichmentStatus } from "../types";
 
-type EnrichmentStatus = "idle" | "loading" | "success" | "error" | "cancelled";
+export const useEnrichment = (
+  csv_id: string,
+  enrichmentStatus: EnrichmentStatus,
+  setEnrichmentStatus: (status: EnrichmentStatus) => void
+) => {
+  const [mounted, setMounted] = useState(false);
 
-export const useEnrichment = (csv_id: string) => {
-  const [enrichmentStatus, setEnrichmentStatus] =
-    useState<EnrichmentStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const csv = useCSVStore((state) => state.getCSV(csv_id));
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const startEnrichment = useCallback(async () => {
+    if (!mounted) return;
     if (!csv) {
       setError("No CSV data available");
       setEnrichmentStatus("error");
@@ -17,8 +25,6 @@ export const useEnrichment = (csv_id: string) => {
     }
 
     try {
-      setEnrichmentStatus("loading");
-
       const response = await fetch("/api/enrichment", {
         method: "POST",
         body: JSON.stringify(csv),
@@ -27,7 +33,7 @@ export const useEnrichment = (csv_id: string) => {
       console.log(data);
       setError(null);
 
-      setEnrichmentStatus("success");
+      setEnrichmentStatus("loading");
     } catch (err) {
       setError(
         err instanceof Error
@@ -36,17 +42,19 @@ export const useEnrichment = (csv_id: string) => {
       );
       setEnrichmentStatus("error");
     }
-  }, [csv]);
+  }, [csv, mounted, setEnrichmentStatus]);
 
   const reset = useCallback(() => {
+    if (!mounted) return;
     setEnrichmentStatus("idle");
     setError(null);
-  }, []);
+  }, [mounted, setEnrichmentStatus]);
 
   return {
     enrichmentStatus,
     startEnrichment,
     error,
     reset,
+    mounted,
   };
 };

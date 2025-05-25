@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,65 +10,52 @@ import {
 } from "@/components/ui/table";
 import { uploadResponseSchema } from "@/lib/zod/api/csv";
 import { z } from "zod";
-import axios from "axios";
-import { tableUpdates } from "@/lib/tableUpdates";
+import { useTableUpdates } from "@/app/_hooks/useTableUpdates";
+import { Button } from "@/components/ui/button";
+import { useEnrichment } from "@/lib/hooks/use-enrichment";
+import { missingCount } from "@/lib/csv/missing-count";
+import { Loader2, PlayIcon } from "lucide-react";
+import { EnrichmentStatus } from "@/lib/types";
 
 interface CsvTableProps {
   data: z.infer<typeof uploadResponseSchema>;
 }
 
-interface TableUpdate {
-  tableId: string;
-  rowId: string;
-  data: string; // JSON string containing the update data
-}
-
 const CsvTable = ({ data }: CsvTableProps) => {
-  const [tableData, setTableData] = useState(data.data);
+  const [enrichmentStatus, setEnrichmentStatus] =
+    useState<EnrichmentStatus>("idle");
+  const {
+    startEnrichment,
+    error: enrichmentError,
+    mounted: enrichmentMounted,
+  } = useEnrichment(data.id, enrichmentStatus, setEnrichmentStatus);
+
+  const {
+    tableData,
+    error: tableError,
+    mounted: tableMounted,
+  } = useTableUpdates(data, enrichmentStatus, setEnrichmentStatus);
+
   const headers = Object.keys(data.data[0]);
+  const missing = useMemo(() => {
+    return missingCount(tableData);
+  }, [tableData]);
 
-  useEffect(() => {
-    const pollUpdates = async () => {
-      try {
-        const response = await axios.get(`/api/updates?tableId=${data.id}`);
-        const updates = response.data as TableUpdate[];
-        const rowIds: string[] = [];
-        if (updates && updates.length > 0) {
-          updates.forEach((update) => {
-            const { tableId, rowId, data: updateData } = update;
-            if (tableId === data.id) {
-              const rowIndex = tableData.findIndex(
-                (_, idx) => idx === parseInt(rowId)
-              );
-              if (rowIndex !== -1) {
-                setTableData((prevData) => {
-                  const newData = [...prevData];
-                  newData[rowIndex] = {
-                    ...newData[rowIndex],
-                    ...JSON.parse(updateData),
-                  };
-                  return newData;
-                });
-                rowIds.push(rowId);
-              }
-            }
-          });
+  if (!tableMounted || !enrichmentMounted) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="w-6 h-6 animate-spin" />
+      </div>
+    );
+  }
 
-          tableUpdates.markRead(data.id, rowIds);
-        }
-      } catch (error) {
-        console.error("Error fetching updates:", error);
-      }
-    };
-
-    // Poll every 2 seconds
-    const intervalId = setInterval(pollUpdates, 2000);
-
-    // Initial poll
-    pollUpdates();
-
-    return () => clearInterval(intervalId);
-  }, [data.id]);
+  if (tableError || enrichmentError) {
+    return (
+      <div className="text-red-500 p-4 border border-red-200 rounded-md">
+        Error: {tableError || enrichmentError}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -81,15 +68,39 @@ const CsvTable = ({ data }: CsvTableProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tableData.map((row, id) => (
-            <TableRow key={Object.values(row).join(",") + id}>
+          {tableData.map((row, index) => (
+            <TableRow key={`row-${data.id}-${index}`}>
               {headers.map((header) => (
-                <TableCell key={header}>{row[header]}</TableCell>
+                <TableCell key={`${data.id}-${index}-${header}`}>
+                  {row[header] ?? ""}
+                </TableCell>
               ))}
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      <section className="mt-4 flex justify-end">
+        <div className="mr-2 border flex px-4 items-center rounded-md">
+          {missing} missing values
+        </div>
+
+        <Button
+          disabled={enrichmentStatus === "loading"}
+          onClick={startEnrichment}
+        >
+          {enrichmentStatus === "loading" ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <PlayIcon className="w-4 h-4 mr-2" />
+          )}
+          {enrichmentStatus === "loading"
+            ? "Enriching..."
+            : enrichmentStatus === "success"
+            ? "Enrichment Complete"
+            : "Start Enrichment"}
+        </Button>
+      </section>
     </>
   );
 };

@@ -1,9 +1,7 @@
 import z from "zod";
 import { uploadResponseSchema } from "../zod/api/csv";
-
-export const missingCount = ({
-  data,
-}: z.infer<typeof uploadResponseSchema>) => {
+type uploadResponse = z.infer<typeof uploadResponseSchema>;
+export const missingCount = (data: uploadResponse["data"]) => {
   const missingCount = data.reduce((acc, row) => {
     return (
       acc +

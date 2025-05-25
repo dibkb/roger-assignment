@@ -30,6 +30,8 @@ export async function POST(request: NextRequest) {
           "Hire AI voice callers for your business operations in an instant. Our AI callers are multilingual, international and 24x7 available.",
       })
     );
+    // clear the table
+    // tableUpdates.clearTable(parsed.id);
     console.log("--------------------------------");
 
     // parsed.data.forEach(async (row, idx) => {
