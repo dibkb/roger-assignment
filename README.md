@@ -40,3 +40,9 @@ To run the test suite:
 ```bash
 pnpm test
 ```
+
+## Live Preview (⚠️ not recommended)
+
+```
+https://roger-assignment.vercel.app/
+```
