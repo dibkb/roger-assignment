@@ -4,7 +4,7 @@ import CsvTable from "./csv-table/csv-table";
 type RowUpdateStatus = "not_updated" | "updating" | "updated" | "error";
 
 interface CSVTableContainerProps {
-  csv: any;
+  csv: { id: string; data: Record<string, string | null>[] };
   tableData: Record<string, string | null>[];
   tableDataError: string[];
   onRowUpdate: (index: number) => Promise<void>;

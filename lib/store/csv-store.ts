@@ -5,7 +5,7 @@ import { uploadResponseSchema } from "@/lib/zod/api/csv";
 
 type CSVData = z.infer<typeof uploadResponseSchema>;
 
-interface CSVStore {
+export interface CSVStore {
   csvs: Record<string, CSVData>;
 
   addCSV: (csv: CSVData) => void;
