@@ -28,6 +28,44 @@ const CsvTable = ({
   const missing = useMemo(() => missingCount(tableData), [tableData]);
   const { canUpdateRow } = useRowUpdatesStore();
 
+  const handleDownloadCSV = () => {
+    // Filter rows that have either email or LinkedIn URL
+    const filteredData = tableData.filter((row) => {
+      const email = row["email"];
+      const linkedin = row["linkedin_url"];
+      return (
+        (email && email.trim() !== "") || (linkedin && linkedin.trim() !== "")
+      );
+    });
+
+    // Convert headers and data to CSV format
+    const csvContent = [
+      headers.join(","),
+      ...filteredData.map((row) =>
+        headers
+          .map((header) => {
+            const value = row[header];
+            // Handle values that might contain commas or quotes
+            if (value === null || value === undefined) return "";
+            const stringValue = String(value);
+            return stringValue.includes(",") ? `"${stringValue}"` : stringValue;
+          })
+          .join(",")
+      ),
+    ].join("\n");
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `table-data-${data.id}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Calculate progress
   const progress = useMemo(() => {
     const completed = tableData.reduce((count, _, index) => {
@@ -97,8 +135,14 @@ const CsvTable = ({
         >
           Update All
         </Button>
+        <Button
+          onClick={handleDownloadCSV}
+          aria-label="Download CSV"
+          variant="outline"
+        >
+          Download CSV
+        </Button>
       </section>
-
       <CostTable apiCost={apiCost} />
     </>
   );
