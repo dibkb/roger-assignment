@@ -66,7 +66,7 @@ https://roger-assignment.vercel.app/
 
 ```mermaid
 graph TD
-    A["Frontend UI<br/>Upload • Table View • UX"] --> B["1. CSV Upload/Drag-Drop<br/>→ Parsed & mapped via GPT-4o<br/>→ Returns: {uuid, normalizedData[]}"]
+    A["Frontend UI<br/>Upload • Table View • UX"] --> B["1. CSV Upload/Drag-Drop<br/>→ Parsed & mapped via GPT-4o (Column Normalization)<br/>→ Returns: { uuid, normalizedData[] }"]
     B --> C["Stored in Zustand Store<br/>+ localStorage for uuid"]
     C --> D["Go to /csv/uuid"]
     D --> E["Table Display<br/>Normalized UI"]
