@@ -21,9 +21,7 @@ export default function CSVPage({
   const [tableData, setTableData] = useState<Record<string, string | null>[]>(
     []
   );
-  const [tableDataError, setTableDataError] = useState<
-    Record<string, string | null>[]
-  >([]);
+  const [tableDataError, setTableDataError] = useState<string[]>([]);
   const { setRowStatus, canUpdateRow, getRowStatus, initializeTable } =
     useRowUpdatesStore();
 
@@ -65,18 +63,18 @@ export default function CSVPage({
           if (response.error)
             setTableDataError((prev) => {
               const newError = [...prev];
-              newError[rowIndex] = { error: response.error || "Unknown error" };
+              newError[rowIndex] = response.error || "Unknown error";
               return newError;
             });
-          setRowStatus(csv_id, rowIndex, "not_updated");
+          setRowStatus(csv_id, rowIndex, "error");
         }
       } catch (error) {
         setTableDataError((prev) => {
           const newError = [...prev];
-          newError[rowIndex] = { error: error as string };
+          newError[rowIndex] = error ? String(error) : "Unknown error";
           return newError;
         });
-        setRowStatus(csv_id, rowIndex, "not_updated");
+        setRowStatus(csv_id, rowIndex, "error");
       }
     },
     [csv_id, tableData, canUpdateRow, setRowStatus]
@@ -112,10 +110,12 @@ export default function CSVPage({
     );
     return hasEmptyValue ? count + 1 : count;
   }, 0);
+
   return (
     <main className="container mx-auto p-4">
       <CsvTable
         totalInitial={totalInitial}
+        tableDataError={tableDataError}
         data={csv}
         tableData={tableData}
         onRowUpdate={handleRowUpdate}

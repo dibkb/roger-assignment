@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -30,6 +30,7 @@ interface RowStatusInfo {
 }
 
 interface CsvTableProps {
+  tableDataError: string[];
   totalInitial: number;
   data: z.infer<typeof uploadResponseSchema>;
   tableData: z.infer<typeof uploadResponseSchema>["data"];
@@ -42,9 +43,15 @@ interface StatusButtonProps {
   status: RowStatusInfo;
   onClick: () => void;
   disabled?: boolean;
+  error?: string;
 }
 
-const StatusButton = ({ status, onClick, disabled }: StatusButtonProps) => {
+const StatusButton = ({
+  status,
+  onClick,
+  disabled,
+  error,
+}: StatusButtonProps) => {
   const getStatusIcon = () => {
     if (disabled) {
       return <RefreshCw className="w-4 h-4 text-gray-400" />;
@@ -98,7 +105,7 @@ const StatusButton = ({ status, onClick, disabled }: StatusButtonProps) => {
               <AlertCircle className="w-4 h-4 text-red-500" />
             </TooltipTrigger>
             <TooltipContent>
-              <p>{status.error}</p>
+              <p>{error}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -115,6 +122,7 @@ interface TableRowProps {
   onUpdate: (index: number) => Promise<void>;
   getStatus: (tableId: string, rowIndex: number) => RowStatusInfo;
   canUpdate: (tableId: string, rowIndex: number) => boolean;
+  error?: string;
 }
 
 const CsvTableRow = ({
@@ -125,6 +133,7 @@ const CsvTableRow = ({
   onUpdate,
   getStatus,
   canUpdate,
+  error,
 }: TableRowProps) => {
   const status = getStatus(tableId, rowIndex);
   const isDisabled = !canUpdate(tableId, rowIndex);
@@ -138,6 +147,7 @@ const CsvTableRow = ({
           status={status}
           onClick={() => onUpdate(rowIndex)}
           disabled={isDisabled || !hasEmptyValue}
+          error={error}
         />
       </TableCell>
       {headers.map((header) => (
@@ -150,6 +160,7 @@ const CsvTableRow = ({
 };
 
 const CsvTable = ({
+  tableDataError,
   data,
   tableData,
   onRowUpdate,
@@ -186,6 +197,7 @@ const CsvTable = ({
             <CsvTableRow
               key={`row-${data.id}-${index}`}
               row={row}
+              error={tableDataError[index]}
               headers={headers}
               rowIndex={index}
               tableId={data.id}

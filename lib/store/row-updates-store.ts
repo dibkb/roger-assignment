@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type RowUpdateStatus = "not_updated" | "updating" | "updated";
+type RowUpdateStatus = "not_updated" | "updating" | "updated" | "error";
 
 interface RowUpdatesState {
   // tableId -> rowIndex -> status
