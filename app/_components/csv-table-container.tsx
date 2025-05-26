@@ -1,4 +1,4 @@
-import { CostBreakdown } from "@/lib/zod/api/response";
+import { CostBreakdown, EnrichmentResponse } from "@/lib/zod/api/response";
 import CsvTable from "./csv-table/csv-table";
 
 type RowUpdateStatus = "not_updated" | "updating" | "updated" | "error";
@@ -15,6 +15,7 @@ interface CSVTableContainerProps {
   apiCost: CostBreakdown[];
   updateAll: () => Promise<void>;
   totalInitial: number;
+  toolCost: EnrichmentResponse["toolUsage"][];
 }
 
 export const CSVTableContainer = ({
@@ -26,10 +27,12 @@ export const CSVTableContainer = ({
   apiCost,
   updateAll,
   totalInitial,
+  toolCost,
 }: CSVTableContainerProps) => {
   return (
     <main className="container mx-auto p-4">
       <CsvTable
+        toolCost={toolCost}
         totalInitial={totalInitial}
         tableDataError={tableDataError}
         data={csv}

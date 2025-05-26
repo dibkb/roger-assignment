@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { uploadResponseSchema } from "@/lib/zod/api/csv";
 import { CostBreakdown } from "@/lib/calculate-cost";
+import { EnrichmentResponse } from "@/lib/zod/api/response";
 
 export type RowData = Record<string, string | null>;
 export type RowStatus = "not_updated" | "updating" | "updated" | "error";
@@ -19,6 +20,7 @@ export interface CsvTableProps {
   onRowUpdate: (rowIndex: number) => Promise<void>;
   getRowStatus: (tableId: string, rowIndex: number) => RowStatusInfo;
   updateAll: () => void;
+  toolCost: EnrichmentResponse["toolUsage"][];
 }
 
 export interface StatusButtonProps {

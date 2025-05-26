@@ -1,7 +1,11 @@
 import { useState, useCallback } from "react";
 import { useRowUpdatesStore } from "@/lib/store/row-updates-store";
 import { enrichSingle } from "@/lib/enrich-single";
-import { CostBreakdown, PersonSchema } from "@/lib/zod/api/response";
+import {
+  CostBreakdown,
+  EnrichmentResponse,
+  PersonSchema,
+} from "@/lib/zod/api/response";
 import { z } from "zod";
 import pLimit from "p-limit";
 import { CONCURRENT_REQUESTS } from "@/lib/const";
@@ -15,6 +19,9 @@ export const useTableOperations = (
     deduplicateRows(initialData).uniqueRows
   );
   const [apiCost, setApiCost] = useState<CostBreakdown[]>([]);
+  const [toolCost, setToolCost] = useState<EnrichmentResponse["toolUsage"][]>(
+    []
+  );
   const [tableDataError, setTableDataError] = useState<string[]>([]);
   const { setRowStatus, canUpdateRow, getRowStatus, initializeTable } =
     useRowUpdatesStore();
@@ -46,6 +53,9 @@ export const useTableOperations = (
           });
           if (response.cost) {
             setApiCost((prev) => [...prev, response.cost]);
+          }
+          if (response.toolUsage) {
+            setToolCost((prev) => [...prev, response.toolUsage]);
           }
           setRowStatus(csv_id, rowIndex, "updated");
         } else {
@@ -85,6 +95,7 @@ export const useTableOperations = (
   }, [csv_id, tableData, canUpdateRow, handleRowUpdate]);
 
   return {
+    toolCost,
     tableData,
     apiCost,
     tableDataError,

@@ -6,7 +6,6 @@ import Loading from "@/app/_components/loading";
 import CsvNotFound from "@/app/_components/not-found";
 import { useTableOperations } from "@/lib/hooks/use-table-operations";
 import { CSVTableContainer } from "@/app/_components/csv-table-container";
-import { deduplicateRows } from "@/lib/de-duplication";
 
 export default function CSVPage({
   params,
@@ -18,6 +17,7 @@ export default function CSVPage({
   const {
     tableData,
     apiCost,
+    toolCost,
     tableDataError,
     handleRowUpdate,
     handleUpdateAll,
@@ -48,6 +48,7 @@ export default function CSVPage({
   return (
     <CSVTableContainer
       csv={csv}
+      toolCost={toolCost}
       tableData={tableData}
       tableDataError={tableDataError}
       onRowUpdate={handleRowUpdate}

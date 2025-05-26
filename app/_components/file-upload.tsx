@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { File, FileIcon, Loader2 } from "lucide-react";
+import { File, Loader2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { uploadResponseSchema, errorResponseSchema } from "@/lib/zod/api/csv";
 import { useCSVStore } from "@/lib/store/csv-store";

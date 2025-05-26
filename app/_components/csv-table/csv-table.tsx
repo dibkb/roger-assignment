@@ -13,6 +13,7 @@ import { useRowUpdatesStore } from "@/lib/store/row-updates-store";
 import { CsvTableProps } from "./types";
 import { CsvTableRow } from "./csv-table-row";
 import CostTable from "./cost-table";
+import CostTableTool from "./tool-cost-table";
 
 const CsvTable = ({
   tableDataError,
@@ -23,6 +24,7 @@ const CsvTable = ({
   updateAll,
   totalInitial,
   apiCost,
+  toolCost,
 }: CsvTableProps) => {
   const headers = useMemo(() => Object.keys(data.data[0]), [data.data]);
   const missing = useMemo(() => missingCount(tableData), [tableData]);
@@ -144,6 +146,7 @@ const CsvTable = ({
         </Button>
       </section>
       <CostTable apiCost={apiCost} />
+      <CostTableTool toolCost={toolCost} />
     </>
   );
 };
