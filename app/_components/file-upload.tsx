@@ -1,14 +1,13 @@
 "use client";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { File, Loader2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { uploadResponseSchema, errorResponseSchema } from "@/lib/zod/api/csv";
 import { useCSVStore } from "@/lib/store/csv-store";
 import { useRouter } from "next/navigation";
+import { useDropzone } from "react-dropzone";
 
 export default function FileUpload() {
   const router = useRouter();
@@ -45,42 +44,57 @@ export default function FileUpload() {
     [addCSV, router]
   );
 
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        handleUpload(acceptedFiles[0]);
+      }
+    },
+    [handleUpload]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "text/csv": [".csv"],
+    },
+    multiple: false,
+    disabled: isLoading,
+  });
+
   return (
     <Card>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          const fileInput = event.currentTarget.elements.namedItem(
-            "file"
-          ) as HTMLInputElement;
-          if (fileInput && fileInput.files && fileInput.files[0]) {
-            handleUpload(fileInput.files[0]);
-          }
-        }}
-      >
+      <form onSubmit={(e) => e.preventDefault()}>
         <CardContent className="p-6 space-y-4">
-          <div className="border-2 border-dashed border-gray-200 rounded-lg flex flex-col gap-1 p-6 items-center">
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed rounded-lg flex flex-col gap-1 p-6 items-center cursor-pointer transition-colors ${
+              isDragActive
+                ? "border-primary bg-primary/5"
+                : "border-gray-200 hover:border-primary/50"
+            }`}
+          >
+            <input {...getInputProps()} />
             <File className="my-4 text-neutral-400 size-6" />
             <span className="text-sm font-medium text-gray-500">
-              Drag and drop a file or click to browse
+              {isDragActive
+                ? "Drop the CSV file here"
+                : "Drag and drop a file or click to browse"}
             </span>
             <span className="text-xs text-gray-500">.csv</span>
           </div>
-          <div className="space-y-2 text-sm">
-            <Label htmlFor="file" className="text-sm font-medium">
-              File
-            </Label>
-            <Input
-              id="file"
-              type="file"
-              placeholder="File"
-              accept="csv/*"
-              disabled={isLoading}
-            />
-          </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" size="lg" disabled={isLoading}>
+          <Button
+            type="button"
+            size="lg"
+            disabled={isLoading}
+            onClick={() =>
+              (
+                document.querySelector('input[type="file"]') as HTMLInputElement
+              )?.click()
+            }
+          >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

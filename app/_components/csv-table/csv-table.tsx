@@ -126,7 +126,7 @@ const CsvTable = ({
             />
           </div>
         </div>
-        <div className="mr-2 border flex px-4 items-center rounded-md">
+        <div className="mr-2 border flex px-4 py-2 items-center rounded-md">
           {missing} missing values
         </div>
 
