@@ -93,14 +93,23 @@ export default function CSVPage({
   if (!csv) {
     return <CsvNotFound />;
   }
-
+  const totalInitial = csv.data.reduce((count, row) => {
+    const hasEmptyValue = Object.values(row).some(
+      (value) => value === null || value?.trim() === ""
+    );
+    return hasEmptyValue ? count + 1 : count;
+  }, 0);
   return (
     <main className="container mx-auto p-4">
       <CsvTable
+        totalInitial={totalInitial}
         data={csv}
         tableData={tableData}
         onRowUpdate={handleRowUpdate}
-        getRowStatus={getRowStatus}
+        getRowStatus={(tableId, rowIndex) => {
+          const status = getRowStatus(tableId, rowIndex);
+          return { status };
+        }}
         updateAll={handleUpdateAll}
       />
     </main>
