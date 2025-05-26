@@ -21,6 +21,9 @@ export default function CSVPage({
   const [tableData, setTableData] = useState<Record<string, string | null>[]>(
     []
   );
+  const [tableDataError, setTableDataError] = useState<
+    Record<string, string | null>[]
+  >([]);
   const { setRowStatus, canUpdateRow, getRowStatus, initializeTable } =
     useRowUpdatesStore();
 
@@ -51,7 +54,6 @@ export default function CSVPage({
 
       try {
         const response = await enrichSingle(rowIndex, tableData);
-        console.log(response);
         if (response?.success && response?.data) {
           setTableData((prevData) => {
             const newData = [...prevData];
@@ -60,10 +62,20 @@ export default function CSVPage({
           });
           setRowStatus(csv_id, rowIndex, "updated");
         } else {
+          if (response.error)
+            setTableDataError((prev) => {
+              const newError = [...prev];
+              newError[rowIndex] = { error: response.error || "Unknown error" };
+              return newError;
+            });
           setRowStatus(csv_id, rowIndex, "not_updated");
         }
       } catch (error) {
-        console.error("Error updating row:", error);
+        setTableDataError((prev) => {
+          const newError = [...prev];
+          newError[rowIndex] = { error: error as string };
+          return newError;
+        });
         setRowStatus(csv_id, rowIndex, "not_updated");
       }
     },
