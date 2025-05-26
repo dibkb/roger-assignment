@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Loader2,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
+  Wand,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -16,7 +22,7 @@ export const StatusButton = ({
 }: StatusButtonProps) => {
   const getStatusIcon = () => {
     if (disabled) {
-      return <RefreshCw className="w-4 h-4 text-gray-400" />;
+      return <Wand className="w-4 h-4 text-gray-400" />;
     }
 
     switch (status.status) {
@@ -27,7 +33,7 @@ export const StatusButton = ({
       case "error":
         return <AlertCircle className="w-4 h-4 text-red-500" />;
       default:
-        return <RefreshCw className="w-4 h-4" />;
+        return <Wand className="w-4 h-4" />;
     }
   };
 
