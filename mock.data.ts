@@ -4,8 +4,8 @@ export const mockData = [
     first_name: "Alice",
     last_name: "Johnson",
     title: "Marketing Specialist",
-    email: "alice.johnson@acmecorp.com",
-    linkedin_url: "https://www.linkedin.com/in/alice-johnson/",
+    email: "",
+    linkedin_url: "",
     company_name: "Acme Corp",
     company_domain: "acmecorp.com",
     company_description:

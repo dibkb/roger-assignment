@@ -18,6 +18,18 @@ export const CsvTableRow = ({
     (value) => value === null || value?.trim() === ""
   );
 
+  const isDonwloadAble = () => {
+    const email = row["email"];
+    const linkedin = row["linkedin_url"];
+    if (
+      (email && email.trim() !== "") ||
+      (linkedin && linkedin.trim() !== "")
+    ) {
+      return true;
+    }
+    return false;
+  };
+
   return (
     <TableRow key={`row-${tableId}-${rowIndex}`}>
       <TableCell>
@@ -29,7 +41,10 @@ export const CsvTableRow = ({
         />
       </TableCell>
       {headers.map((header) => (
-        <TableCell key={`${tableId}-${rowIndex}-${header}`}>
+        <TableCell
+          key={`${tableId}-${rowIndex}-${header}`}
+          className={!isDonwloadAble() ? "text-red-500 bg-red-100" : ""}
+        >
           {row[header] ?? ""}
         </TableCell>
       ))}
