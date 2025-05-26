@@ -1,16 +1,10 @@
+import { cleanAndParseJson } from "@/lib/clean-json";
 import { uploadResponseSchema } from "@/lib/zod/api/csv";
 import { errorResponseSchema } from "@/lib/zod/api/csv";
+import { columnName } from "@/src/mastra/agents/columnName";
 import { NextRequest, NextResponse } from "next/server";
 import Papa from "papaparse";
 import { v4 as uuidv4 } from "uuid";
-
-// Define the column mapping
-const columnMapping: Record<string, string> = {
-  // Add your column mappings here, for example:
-  // "Original Column": "New Column",
-  // "First Name": "firstName",
-  // "Last Name": "lastName",
-};
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -23,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   const text = await file.text();
-  const { data, errors, meta } = Papa.parse(text, {
+  const { data, errors, meta } = Papa.parse<Record<string, string>>(text, {
     header: true,
     skipEmptyLines: true,
   });
@@ -34,13 +28,26 @@ export async function POST(request: NextRequest) {
       { status: 422 }
     );
   }
+
+  const res = await columnName.generate(JSON.stringify(meta.fields));
+  const json = cleanAndParseJson(res.text);
   console.log(meta.fields);
+  console.log(json);
 
   // Transform the data with new column names
-  const transformedData = data.map((row: any) => {
-    const newRow: Record<string, any> = {};
+  const transformedData = data.map((row) => {
+    const newRow: Record<string, string> = {};
+
+    const reverseMapping: Record<string, string> = {};
+    Object.entries(json).forEach(([standardName, originalName]) => {
+      if (typeof originalName === "string") {
+        reverseMapping[originalName] = standardName;
+      }
+    });
+
     Object.entries(row).forEach(([key, value]) => {
-      const newKey = columnMapping[key] || key; // Use mapped name if exists, otherwise keep original
+      const newKey = reverseMapping[key] || key;
+
       newRow[newKey] = value;
     });
     return newRow;

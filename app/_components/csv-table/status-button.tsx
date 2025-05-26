@@ -1,11 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Loader2,
-  RefreshCw,
-  CheckCircle2,
-  AlertCircle,
-  Wand,
-} from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, Wand } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
