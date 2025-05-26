@@ -1,4 +1,4 @@
-import { cleanAndParseJson } from "./clean-json";
+import { cleanAndParseJson } from "@/lib/clean-json";
 
 describe("cleanAndParseJson", () => {
   it("should parse clean JSON data correctly", () => {
