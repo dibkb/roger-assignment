@@ -51,7 +51,8 @@ export default function CSVPage({
 
       try {
         const response = await enrichSingle(rowIndex, tableData);
-        if (response.success && response.data) {
+        console.log(response);
+        if (response?.success && response?.data) {
           setTableData((prevData) => {
             const newData = [...prevData];
             newData[rowIndex] = response.data as z.infer<typeof PersonSchema>;
