@@ -1,0 +1,9 @@
+full_name,email,linkedin_url,title,company_name
+Alice Smith,alice@gmail.com,,Software Engineer,Acme Corp
+Alice Smith,,https://linkedin.com/in/alice-smith,Software Engineer,Acme Corp
+Bob Johnson,bob@gmail.com,,CTO,Techwave
+Charlie Ray,charlie@xyz.com,https://linkedin.com/in/charlie-ray,Marketing Manager,XYZ Inc
+Alice Smith,alice@gmail.com,,Senior Developer,Acme Corp
+Eve Watson,,https://linkedin.com/in/eve-watson,HR Manager,People Inc
+Eve Watson,,https://linkedin.com/in/eve-watson,,People Inc
+Bob Johnson,bob@gmail.com,,CTO,Techwave

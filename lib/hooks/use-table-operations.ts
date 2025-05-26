@@ -5,13 +5,15 @@ import { CostBreakdown, PersonSchema } from "@/lib/zod/api/response";
 import { z } from "zod";
 import pLimit from "p-limit";
 import { CONCURRENT_REQUESTS } from "@/lib/const";
+import { deduplicateRows } from "../de-duplication";
 
 export const useTableOperations = (
   csv_id: string,
   initialData: Record<string, string | null>[]
 ) => {
-  const [tableData, setTableData] =
-    useState<Record<string, string | null>[]>(initialData);
+  const [tableData, setTableData] = useState<Record<string, string | null>[]>(
+    deduplicateRows(initialData).uniqueRows
+  );
   const [apiCost, setApiCost] = useState<CostBreakdown[]>([]);
   const [tableDataError, setTableDataError] = useState<string[]>([]);
   const { setRowStatus, canUpdateRow, getRowStatus, initializeTable } =
