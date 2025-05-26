@@ -28,9 +28,13 @@ interface CsvTableProps {
 interface StatusButtonProps {
   status: RowStatus;
   onClick: () => void;
+  disabled: boolean;
 }
-
-const StatusButton = ({ status, onClick }: StatusButtonProps) => {
+const StatusButton: React.FC<StatusButtonProps> = ({
+  status,
+  onClick,
+  disabled,
+}) => {
   const getStatusIcon = () => {
     switch (status) {
       case "updating":
@@ -52,13 +56,13 @@ const StatusButton = ({ status, onClick }: StatusButtonProps) => {
         return "Update row";
     }
   };
-
+  console.log(disabled);
   return (
     <Button
       variant="ghost"
       size="sm"
       onClick={onClick}
-      disabled={status === "updating"}
+      disabled={status === "updating" || disabled}
       className="p-1"
       aria-label={getStatusLabel()}
     >
@@ -86,10 +90,17 @@ const CsvTableRow = ({
 }: TableRowProps) => {
   const status = getStatus(tableId, rowIndex);
 
+  const hasEmptyValue = Object.values(row).some(
+    (value) => value === null || value?.trim() === ""
+  );
   return (
     <TableRow key={`row-${tableId}-${rowIndex}`}>
       <TableCell>
-        <StatusButton status={status} onClick={() => onUpdate(rowIndex)} />
+        <StatusButton
+          status={status}
+          onClick={() => onUpdate(rowIndex)}
+          disabled={!hasEmptyValue}
+        />
       </TableCell>
       {headers.map((header) => (
         <TableCell key={`${tableId}-${rowIndex}-${header}`}>

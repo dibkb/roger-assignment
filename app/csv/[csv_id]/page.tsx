@@ -10,6 +10,7 @@ import { enrichSingle } from "@/lib/enrich-single";
 import { PersonSchema } from "@/lib/zod/api/response";
 import { z } from "zod";
 import pLimit from "p-limit";
+import { CONCURRENT_REQUESTS } from "@/lib/const";
 export default function CSVPage({
   params,
 }: {
@@ -33,6 +34,16 @@ export default function CSVPage({
   const handleRowUpdate = useCallback(
     async (rowIndex: number) => {
       if (!canUpdateRow(csv_id, rowIndex)) {
+        return;
+      }
+
+      // Check if at least one value is null or empty
+      const row = tableData[rowIndex];
+      const hasEmptyValue = Object.values(row).some(
+        (value) => value === null || value?.trim() === ""
+      );
+
+      if (!hasEmptyValue) {
         return;
       }
 
@@ -61,7 +72,7 @@ export default function CSVPage({
   const handleUpdateAll = useCallback(async () => {
     if (!csv) return;
 
-    const limit = pLimit(3);
+    const limit = pLimit(CONCURRENT_REQUESTS || 6);
 
     const tasks = csv.data.map((_, index) => {
       return limit(() => {

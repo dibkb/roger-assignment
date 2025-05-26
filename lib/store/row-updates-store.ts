@@ -54,6 +54,7 @@ export const useRowUpdatesStore = create<RowUpdatesState>((set, get) => ({
   canUpdateRow: (tableId: string, rowIndex: number) => {
     const state = get();
     const currentStatus = state.rowStatuses[tableId]?.[rowIndex];
+
     return currentStatus !== "updated";
   },
 
