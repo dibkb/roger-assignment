@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    Object.entries(row).forEach(([key, value]) => {
+    Object.entries(row).forEach(([key, value]: [string, string]) => {
       const newKey = reverseMapping[key] || key;
 
       newRow[newKey] = value;
