@@ -41,6 +41,16 @@ To run the test suite:
 pnpm test
 ```
 
+## Sample Data
+
+Sample CSV files are available in the `sample-data` directory:
+
+- `data-dup.csv`: Contains sample data with potential duplicates
+- `data2.csv`: Additional sample dataset
+- `datqa.csv`: Another sample dataset
+
+You can use these files to test the application's functionality.
+
 ## Live Preview (⚠️ not recommended)
 
 ```
