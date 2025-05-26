@@ -14,10 +14,21 @@ export const PersonSchema = z.object({
 
 export type Person = z.infer<typeof PersonSchema>;
 
+export const CostBreakdownSchema = z.object({
+  promptTokens: z.number(),
+  completionTokens: z.number(),
+  promptCost: z.number(),
+  completionCost: z.number(),
+  totalCost: z.number(),
+});
+
+export type CostBreakdown = z.infer<typeof CostBreakdownSchema>;
+
 export const EnrichmentResponseSchema = z.object({
   success: z.boolean(),
   data: PersonSchema.optional(),
   error: z.string().optional(),
+  cost: CostBreakdownSchema,
 });
 
 export type EnrichmentResponse = z.infer<typeof EnrichmentResponseSchema>;

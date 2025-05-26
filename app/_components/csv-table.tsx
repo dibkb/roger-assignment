@@ -20,6 +20,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { CostBreakdown } from "@/lib/calculate-cost";
+import CostTable from "./cost-table";
 
 type RowData = Record<string, string | null>;
 type RowStatus = "not_updated" | "updating" | "updated" | "error";
@@ -30,6 +32,7 @@ interface RowStatusInfo {
 }
 
 interface CsvTableProps {
+  apiCost: CostBreakdown[];
   tableDataError: string[];
   totalInitial: number;
   data: z.infer<typeof uploadResponseSchema>;
@@ -167,6 +170,7 @@ const CsvTable = ({
   getRowStatus,
   updateAll,
   totalInitial,
+  apiCost,
 }: CsvTableProps) => {
   const headers = useMemo(() => Object.keys(data.data[0]), [data.data]);
   const missing = useMemo(() => missingCount(tableData), [tableData]);
@@ -180,6 +184,13 @@ const CsvTable = ({
     }, 0);
     return { completed, total: totalInitial };
   }, [tableData, data.id, getRowStatus, totalInitial]);
+
+  const totalRemaining = tableData.reduce((count, row) => {
+    const hasEmptyValue = Object.values(row).some(
+      (value) => value === null || value?.trim() === ""
+    );
+    return hasEmptyValue ? count + 1 : count;
+  }, 0);
 
   return (
     <>
@@ -227,10 +238,16 @@ const CsvTable = ({
           {missing} missing values
         </div>
 
-        <Button onClick={updateAll} aria-label="Update all rows">
+        <Button
+          onClick={updateAll}
+          aria-label="Update all rows"
+          disabled={totalRemaining === 0}
+        >
           Update All
         </Button>
       </section>
+
+      <CostTable apiCost={apiCost} />
     </>
   );
 };

@@ -7,7 +7,7 @@ import CsvTable from "@/app/_components/csv-table";
 import Loading from "@/app/_components/loading";
 import CsvNotFound from "@/app/_components/not-found";
 import { enrichSingle } from "@/lib/enrich-single";
-import { PersonSchema } from "@/lib/zod/api/response";
+import { CostBreakdown, PersonSchema } from "@/lib/zod/api/response";
 import { z } from "zod";
 import pLimit from "p-limit";
 import { CONCURRENT_REQUESTS } from "@/lib/const";
@@ -21,6 +21,7 @@ export default function CSVPage({
   const [tableData, setTableData] = useState<Record<string, string | null>[]>(
     []
   );
+  const [apiCost, setApiCost] = useState<CostBreakdown[]>([]);
   const [tableDataError, setTableDataError] = useState<string[]>([]);
   const { setRowStatus, canUpdateRow, getRowStatus, initializeTable } =
     useRowUpdatesStore();
@@ -58,6 +59,9 @@ export default function CSVPage({
             newData[rowIndex] = response.data as z.infer<typeof PersonSchema>;
             return newData;
           });
+          if (response.cost) {
+            setApiCost((prev) => [...prev, response.cost]);
+          }
           setRowStatus(csv_id, rowIndex, "updated");
         } else {
           if (response.error)
@@ -123,6 +127,7 @@ export default function CSVPage({
           const status = getRowStatus(tableId, rowIndex);
           return { status };
         }}
+        apiCost={apiCost}
         updateAll={handleUpdateAll}
       />
     </main>
