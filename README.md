@@ -66,21 +66,65 @@ https://roger-assignment.vercel.app/
 
 ```mermaid
 graph TD
-    A[Frontend UI\nUpload • Table View • UX] --> B[1. CSV Upload/Drag-Drop\n→ Parsed & mapped via GPT-4o\n→ Returns: { uuid, normalizedData[] }]
-    B --> C[Stored in Zustand Store\n+ localStorage for uuid]
-    C --> D[Go to /csv/uuid]
-    D --> E[Table Display\nNormalized UI]
-    E --> F[Deduplication Logic\n→ By email/linkedin]
-    F --> G[Unique Deduplicated Entries]
-    G --> H[Enhance\nRow Btn]
-    G --> I[Enhance All Btn\nUses p-limit(6)\n→ Calls Enhance Row under hood]
-    I --> J[Mastra AI Agent \nTools:\n• SCRAPIN\n• SCRAPEOW\n• SERP API]
-    J --> K[Enhanced Row Data\n→ Replace in UI]
-    K --> L[Token Usage Count]
-    K --> M[Global Progress]
-    K --> N[Per Row Error Info]
-    M --> O[Highlight rows\nmissing email/LI]
-    O --> P[Download Enhanced\nCSV Filtered]
+    A["Frontend UI<br/>Upload • Table View • UX"] --> B["1. CSV Upload/Drag-Drop<br/>→ Parsed & mapped via GPT-4o<br/>→ Returns: {uuid, normalizedData[]}"]
+    B --> C["Stored in Zustand Store<br/>+ localStorage for uuid"]
+    C --> D["Go to /csv/uuid"]
+    D --> E["Table Display<br/>Normalized UI"]
+    E --> F["Deduplication Logic<br/>→ By email/linkedin"]
+    F --> G["Unique Deduplicated Entries"]
+    G --> H["Enhance<br/>Row Btn"]
+    G --> I["Enhance All Btn<br/>Uses p-limit(6)<br/>→ Calls Enhance Row under hood"]
+    I --> J["Mastra AI Agent<br/>Tools:<br/>• SCRAPIN<br/>• SCRAPEOW<br/>• SERP API"]
+    J --> K["Enhanced Row Data<br/>→ Replace in UI"]
+    K --> L["Token Usage Count"]
+    K --> M["Global Progress"]
+    K --> N["Per Row Error Info"]
+    M --> O["Highlight rows<br/>missing email/LI"]
+    O --> P["Download Enhanced<br/>CSV Filtered"]
 ```
 
-This diagram illustrates the flow of data and user interactions in the application, from CSV upload through processing, enhancement, and final output.
+---
+
+### Architecture Summary
+
+1. **CSV Upload**
+
+   - User uploads CSV via UI.
+   - Parsed and normalized using **GPT-4o** (header mapping).
+
+2. **Storage**
+
+   - Parsed data stored in **Zustand** + **localStorage** under a `uuid`.
+   - Redirects to `/csv/uuid`.
+
+3. **Deduplication**
+
+   - Rows deduplicated by `email` or `linkedin_url`.
+
+4. **Enhancement Options**
+
+   - **Enhance All** → runs row enhancement using `p-limit(6)`.
+   - **Enhance Row** → can be triggered individually.
+
+5. **Mastra AI Agent**
+
+   - No retry logic.
+   - Tools available:
+
+     - `SCRAPIN`
+     - `SCRAPEOW`
+     - `SERP API`
+
+6. **Result Handling**
+
+   - Enhanced rows replace originals in UI.
+   - Tracks:
+
+     - ✅ Token usage
+     - ✅ Progress bar
+     - ⚠️ Error info per row
+
+7. **Download**
+
+   - User can download filtered, enhanced CSV.
+   - Highlights incomplete rows (missing key fields).
