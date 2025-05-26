@@ -61,3 +61,26 @@ A demonstration of the application's features is available here:
 ```
 https://roger-assignment.vercel.app/
 ```
+
+## System Design
+
+```mermaid
+graph TD
+    A[Frontend UI\nUpload • Table View • UX] --> B[1. CSV Upload/Drag-Drop\n→ Parsed & mapped via GPT-4o\n→ Returns: { uuid, normalizedData[] }]
+    B --> C[Stored in Zustand Store\n+ localStorage for uuid]
+    C --> D[Go to /csv/uuid]
+    D --> E[Table Display\nNormalized UI]
+    E --> F[Deduplication Logic\n→ By email/linkedin]
+    F --> G[Unique Deduplicated Entries]
+    G --> H[Enhance\nRow Btn]
+    G --> I[Enhance All Btn\nUses p-limit(6)\n→ Calls Enhance Row under hood]
+    I --> J[Mastra AI Agent \nTools:\n• SCRAPIN\n• SCRAPEOW\n• SERP API]
+    J --> K[Enhanced Row Data\n→ Replace in UI]
+    K --> L[Token Usage Count]
+    K --> M[Global Progress]
+    K --> N[Per Row Error Info]
+    M --> O[Highlight rows\nmissing email/LI]
+    O --> P[Download Enhanced\nCSV Filtered]
+```
+
+This diagram illustrates the flow of data and user interactions in the application, from CSV upload through processing, enhancement, and final output.
