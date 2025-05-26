@@ -31,8 +31,6 @@ export async function POST(request: NextRequest) {
 
   const res = await columnName.generate(JSON.stringify(meta.fields));
   const json = cleanAndParseJson(res.text);
-  console.log(meta.fields);
-  console.log(json);
 
   // Transform the data with new column names
   const transformedData = data.map((row) => {

@@ -4,8 +4,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FileIcon } from "lucide-react";
-import { useCallback } from "react";
+import { FileIcon, Loader2 } from "lucide-react";
+import { useCallback, useState } from "react";
 import { uploadResponseSchema, errorResponseSchema } from "@/lib/zod/api/csv";
 import { useCSVStore } from "@/lib/store/csv-store";
 import { useRouter } from "next/navigation";
@@ -13,19 +13,21 @@ import { useRouter } from "next/navigation";
 export default function FileUpload() {
   const router = useRouter();
   const addCSV = useCSVStore((state) => state.addCSV);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleUpload = useCallback(
     async (file: File) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
-
-      // Parse the response using Zod
+      setIsLoading(true);
       try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+
+        // Parse the response using Zod
         if (response.ok) {
           const parsedData = uploadResponseSchema.parse(data);
           addCSV(parsedData);
@@ -36,6 +38,8 @@ export default function FileUpload() {
         }
       } catch (error) {
         console.error("Invalid response format:", error);
+      } finally {
+        setIsLoading(false);
       }
     },
     [addCSV, router]
@@ -66,12 +70,25 @@ export default function FileUpload() {
             <Label htmlFor="file" className="text-sm font-medium">
               File
             </Label>
-            <Input id="file" type="file" placeholder="File" accept="csv/*" />
+            <Input
+              id="file"
+              type="file"
+              placeholder="File"
+              accept="csv/*"
+              disabled={isLoading}
+            />
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" size="lg">
-            Upload
+          <Button type="submit" size="lg" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              "Upload"
+            )}
           </Button>
         </CardFooter>
       </form>
