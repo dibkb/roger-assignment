@@ -12,7 +12,6 @@ cd roger-assignment
 2. Environment Configuration:
 
 ```bash
-cd ..
 cp .env.example .env
 ```
 
