@@ -62,34 +62,38 @@ A demonstration of the application's features is available here:
 https://roger-assignment.vercel.app/
 ```
 
-## System Design
+## System Design Diagram
 
 ```mermaid
 graph TD
-    A["Frontend UI
-Upload • Table View • UX"] --> B["CSV Upload Drag-Drop Parsed & mapped via GPT-4o
- Returns uuid normalizedData"]
-    B --> C["Stored in Zustand Store
-+ localStorage for uuid"]
-    C --> D["Go to /csv/uuid"]
-    D --> E["Table Display
-Normalized UI"]
-    E --> F["Deduplication Logic
-By email/linkedin"]
-    F --> G["Unique Deduplicated Entries"]
-    G --> H["Enhance
-Row Btn"] & I["Enhance All Btn
-Uses p-limit(6)
-Calls Enhance Row under hood"]
-    I --> J["Mastra AI Agent
-Tools: SCRAPIN, SCRAPEOW, SERP API"]
-    J --> K["Enhanced Row Data
-Replace in UI"]
-    K --> L["Token Usage Count"] & M["Global Progress"] & N["Per Row Error Info"]
-    M --> O["Highlight rows
-missing email / LI"]
-    O --> P["Download Enhanced
-CSV (Filtered)"]
+   A["🎨 Frontend UI<br/>📤 Upload • 📊 Table View • ✨ UX"] --> B["📄 CSV Upload / Drag-Drop<br/>🤖 Parsed & mapped via GPT-4o<br/>📦 Returns: uuid, normalizedData"]
+   B --> C["💾 Stored in Zustand Store<br/>🔄 + localStorage for uuid"]
+   C --> D["🌐 Go to /csv/uuid"]
+   D --> E["📋 Table Display<br/>🎯 Normalized UI"]
+   E --> F["🔍 Deduplication Logic<br/>📧 By email/linkedin"]
+   F --> G["✅ Unique Deduplicated Entries"]
+   G --> H["⚡ Enhance<br/>🔘 Row Btn"]
+   G --> I["🚀 Enhance All Btn<br/>⚙️ Uses p-limit(6)<br/>🔗 Calls Enhance Row under hood"]
+   I --> J["🤖 Mastra AI Agent<br/>🛠️ Tools: SCRAPIN, SCRAPEOW, SERP API"]
+   J --> K["✨ Enhanced Row Data<br/>🔄 Replace in UI"]
+   K --> L["📊 Token Usage Count"]
+   K --> M["📈 Global Progress"]
+   K --> N["❌ Per Row Error Info"]
+   M --> O["🔍 Highlight rows<br/>⚠️ missing email / LI"]
+   O --> P["⬇️ Download Enhanced<br/>📊 CSV (Filtered)"]
+
+   %% Styling
+   classDef primaryNode fill:#4f46e5,stroke:#312e81,stroke-width:2px,color:#fff,font-weight:bold
+   classDef processNode fill:#059669,stroke:#064e3b,stroke-width:2px,color:#fff,font-weight:bold
+   classDef storageNode fill:#dc2626,stroke:#991b1b,stroke-width:2px,color:#fff,font-weight:bold
+   classDef actionNode fill:#ea580c,stroke:#9a3412,stroke-width:2px,color:#fff,font-weight:bold
+   classDef outputNode fill:#7c3aed,stroke:#581c87,stroke-width:2px,color:#fff,font-weight:bold
+
+   class A primaryNode
+   class B,F,J processNode
+   class C,E storageNode
+   class D,G,H,I actionNode
+   class K,L,M,N,O,P outputNode
 ```
 
 ---
