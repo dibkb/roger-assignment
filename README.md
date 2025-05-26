@@ -51,6 +51,11 @@ Sample CSV files are available in the `sample-data` directory:
 
 You can use these files to test the application's functionality.
 
+## Demo Video
+
+A demonstration of the application's features is available here:
+[Watch Demo Video](https://www.loom.com/share/21e250bde51c4ee08fc9ecbd7a7adc47?sid=d027e385-82e0-4ab6-8486-43011783a661)
+
 ## Live Preview (⚠️ not recommended)
 
 ```
