@@ -1,5 +1,5 @@
-import CsvTable from "@/app/_components/csv-table";
 import { CostBreakdown } from "@/lib/zod/api/response";
+import CsvTable from "./csv-table/csv-table";
 
 type RowUpdateStatus = "not_updated" | "updating" | "updated" | "error";
 
